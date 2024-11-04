@@ -17,7 +17,7 @@
 #define USB_FW_MSC_VOLUME_NAME      "S3-Firmware"  // max 11 chars
 #define USB_FW_MSC_SERIAL_NUMBER    0x00000000
 
-static const uint8_t LED_BUILTIN = 43;
+static const uint8_t LED_BUILTIN = 44;
 #define BUILTIN_LED LED_BUILTIN // backward compatibility
 #define LED_BUILTIN LED_BUILTIN // allow testing #ifdef LED_BUILTIN
 static const bool LED_ACTIVE_LEVEL = false;
