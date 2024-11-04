@@ -32,12 +32,20 @@ SlimeVR::Logging::Logger logger("Main");
     led.displayError(errorCode);
 }
 
-void setup() { 
-    hidDevice.begin();
-    USB.begin();
+void debugPacket(const uint8_t packet[ESPNowCommunication::packetSizeBytes]) {
+    Serial.print("New packet: ");
+    for(int i = 0; i < ESPNowCommunication::packetSizeBytes; ++i) {
+        Serial.printf("%02x ", packet[i]);
+    }
+    Serial.println();
+}
 
+void setup() { 
     Serial.begin(115200);
     Serial.println("Starting up " USB_PRODUCT "...");
+    
+    hidDevice.begin();
+    USB.begin();
 
     button.begin();
 
@@ -87,6 +95,7 @@ void setup() {
 
     espnow.onPacketReceived(
             [&](const uint8_t packet[ESPNowCommunication::packetSizeBytes]) {
+                //debugPacket(packet);
                 PacketHandling::getInstance().insert(packet);
             });
     Serial.println("Boot complete");
