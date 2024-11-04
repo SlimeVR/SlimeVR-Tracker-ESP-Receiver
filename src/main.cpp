@@ -5,9 +5,12 @@
 #include "espnow/espnow.h"
 #include "led.h"
 #include "packetHandling.h"
+#include "logging/Logger.h"
 
 #include <Arduino.h>
 #include <USB.h>
+#include <USBCDC.h>
+
 
 /*
  * Todo:
@@ -23,29 +26,35 @@ HIDDevice hidDevice;
 Button &button = Button::getInstance();
 ESPNowCommunication &espnow = ESPNowCommunication::getInstance();
 LED led;
+SlimeVR::Logging::Logger logger("Main");
 
 [[noreturn]] [[noreturn]] void fail(ErrorCodes errorCode) {
     led.displayError(errorCode);
 }
 
-void setup() {
-    Serial.begin(115200);
+void setup() { 
     hidDevice.begin();
     USB.begin();
+
+    Serial.begin(115200);
+    Serial.println("Starting up " USB_PRODUCT "...");
 
     button.begin();
 
     button.onLongPress([]() {
         if (!espnow.isInPairingMode()) {
+            Serial.println("Pairing mode enabled");
             espnow.enterPairingMode();
             led.sendContinuousBlinks(0.1f, 0.5f);
         } else {
+            Serial.println("Pairing mode disabled");
             espnow.exitPairingMode();
             led.stopBlinking();
         }
     });
     button.onMultiPress([](size_t pressCount) {
         if (pressCount == 5) {
+            Serial.println("Trackers reset");
             Configuration::getInstance().changeSavedTrackerCount(0);
             led.sendBlinks(5, 0.2f, 0.1f);
             return;
@@ -53,28 +62,34 @@ void setup() {
     });
 
     led.begin();
+    led.setState(false);
 
     ErrorCodes result = espnow.begin();
     if (result != ErrorCodes::NO_ERROR) {
         fail(result);
     }
 
-    espnow.onTrackerPaired([&]() { led.sendBlinks(3, 0.1f); });
+    espnow.onTrackerPaired([&]() { 
+        Serial.println("New tracker paired");
+        led.sendBlinks(3, 0.1f);
+        });
     espnow.onTrackerConnected(
-            [&](uint8_t trackerId, const uint8_t *trackerMacAddress) {
-                led.sendBlinks(2, 0.1f);
-                uint8_t packet[16];
-                packet[0] = 0xff;
-                packet[1] = trackerId;
-                memcpy(&packet[2], trackerMacAddress, sizeof(uint8_t) * 6);
-                memset(&packet[8], 0, sizeof(uint8_t) * 8);
-                PacketHandling::getInstance().insert(packet);
-            });
+        [&](uint8_t trackerId, const uint8_t *trackerMacAddress) {
+            Serial.println("New tracker connected");
+            led.sendBlinks(2, 0.1f);
+            uint8_t packet[16];
+            packet[0] = 0xff;
+            packet[1] = trackerId;
+            memcpy(&packet[2], trackerMacAddress, sizeof(uint8_t) * 6);
+            memset(&packet[8], 0, sizeof(uint8_t) * 8);
+            PacketHandling::getInstance().insert(packet);
+        });
 
     espnow.onPacketReceived(
             [&](const uint8_t packet[ESPNowCommunication::packetSizeBytes]) {
                 PacketHandling::getInstance().insert(packet);
             });
+    Serial.println("Boot complete");
 }
 
 void loop() {
