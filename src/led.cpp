@@ -7,7 +7,7 @@
 
 void LED::begin() {
     pinMode(LED_BUILTIN, OUTPUT);
-    digitalWrite(LED_BUILTIN, LOW);
+    digitalWrite(LED_BUILTIN, !LED_ACTIVE_LEVEL);
 }
 
 void LED::update() {

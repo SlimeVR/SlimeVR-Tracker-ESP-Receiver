@@ -20,7 +20,7 @@
 static const uint8_t LED_BUILTIN = 15;
 #define BUILTIN_LED LED_BUILTIN // backward compatibility
 #define LED_BUILTIN LED_BUILTIN // allow testing #ifdef LED_BUILTIN
-static const bool LED_ACTIVE_LEVEL = false;
+static const bool LED_ACTIVE_LEVEL = true;
 
 static const uint8_t USER_BUTTON = 0;
 static const bool USER_BUTTON_ACTIVE_LEVEL = false;
