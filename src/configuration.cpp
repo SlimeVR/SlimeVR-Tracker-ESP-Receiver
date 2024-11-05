@@ -5,11 +5,28 @@ Configuration &Configuration::getInstance() {
 }
 
 void Configuration::setup() {
-    LittleFS.begin();
+    bool status = LittleFS.begin();
+    if (!status) {
+        Serial.println("Could not mount LittleFS, formatting");
+
+        status = LittleFS.format();
+        if (!status) {
+            Serial.println("Could not format LittleFS, aborting");
+            return;
+        }
+
+        status = LittleFS.begin();
+        if (!status) {
+            Serial.println("Could not mount LittleFS, aborting");
+            return;
+        }
+    }
+    Serial.println("LittleFS is mounted");
 }
 
 uint8_t Configuration::getSavedTrackerCount() {
     if (!LittleFS.exists(savedTrackerCountPath)) {
+        Serial.printf("%s doesn't exist, returning 0 saved trackers\n", savedTrackerCountPath);
         return 0;
     }
 
@@ -21,8 +38,9 @@ uint8_t Configuration::getSavedTrackerCount() {
     return result;
 }
 
-void Configuration::changeSavedTrackerCount(uint8_t newValue) {
-    auto file = LittleFS.open(savedTrackerCountPath, "w");
+void Configuration::setSavedTrackerCount(uint8_t newValue) {
+    Serial.printf("New saved trackers count: %d\n", newValue);
+    auto file = LittleFS.open(savedTrackerCountPath, "w", true);
     file.write(&newValue, sizeof(uint8_t));
     file.close();
 }

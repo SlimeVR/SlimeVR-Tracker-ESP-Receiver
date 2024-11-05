@@ -43,7 +43,7 @@ void debugPacket(const uint8_t packet[ESPNowCommunication::packetSizeBytes]) {
 void setup() { 
     Serial.begin(115200);
     Serial.println("Starting up " USB_PRODUCT "...");
-    
+    Configuration::getInstance().setup();
     hidDevice.begin();
     USB.begin();
 
@@ -63,7 +63,7 @@ void setup() {
     button.onMultiPress([](size_t pressCount) {
         if (pressCount == 5) {
             Serial.println("Trackers reset");
-            Configuration::getInstance().changeSavedTrackerCount(0);
+            Configuration::getInstance().setSavedTrackerCount(0);
             led.sendBlinks(5, 0.2f, 0.1f);
             return;
         }

@@ -111,12 +111,11 @@ void ESPNowCommunication::handleMessage(const esp_now_recv_info_t *senderInfo,
         esp_now_send(senderInfo->src_addr,
                      reinterpret_cast<uint8_t *>(&message),
                      sizeof(message));
-        nextTrackerId++;
-        Configuration::getInstance().changeSavedTrackerCount(nextTrackerId);
+        Configuration::getInstance().setSavedTrackerCount(nextTrackerId + 1);
         deletePeer(senderInfo->src_addr);
 
-        Serial.printf("Paired a new tracker at mac address" MACSTR "!\n",
-                      MAC2ARGS(senderInfo->src_addr));
+        Serial.printf("Paired a new tracker at mac address " MACSTR " and tracker id %d!\n",
+                      MAC2ARGS(senderInfo->src_addr), message.trackerId);
         invokeTrackerPairedEvent();
         break;
     }
@@ -134,8 +133,8 @@ void ESPNowCommunication::handleMessage(const esp_now_recv_info_t *senderInfo,
                      sizeof(ESPNowConnectionMessage));
         deletePeer(senderInfo->src_addr);
 
-        Serial.printf("Device with mac address " MACSTR " connected!\n",
-                      MAC2ARGS(senderInfo->src_addr));
+        Serial.printf("Device with mac address " MACSTR " connected with tracker id %d!\n",
+                      MAC2ARGS(senderInfo->src_addr), message->connection.trackerId);
         invokeTrackerConnectedEvent(message->connection.trackerId,
                                     senderInfo->src_addr);
         break;

@@ -8,7 +8,7 @@ public:
     static Configuration &getInstance();
     void setup();
     uint8_t getSavedTrackerCount();
-    void changeSavedTrackerCount(uint8_t newValue);
+    void setSavedTrackerCount(uint8_t newValue);
 
 private:
     Configuration() = default;
