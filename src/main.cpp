@@ -87,7 +87,7 @@ void setup() {
             led.sendBlinks(2, 0.1f);
             uint8_t packet[16];
             packet[0] = 0xff;
-            packet[1] = trackerId;
+            packet[1] = trackerId << 2;
             memcpy(&packet[2], trackerMacAddress, sizeof(uint8_t) * 6);
             memset(&packet[8], 0, sizeof(uint8_t) * 8);
             PacketHandling::getInstance().insert(packet);
